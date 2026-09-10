@@ -7,6 +7,7 @@ venv/
 # Data and secrets
 .env
 .env.*
+!.env.example
 *.key
 
 # Editors and operating systems
@@ -19,3 +20,7 @@ Thumbs.db
 dist/
 build/
 *.log
+node_modules/
+.cache/
+test-results/
+*.tsbuildinfo
