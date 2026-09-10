@@ -2,4 +2,4 @@
 
 | 编号 | 主题 | 父分支 | 依赖分支 | 状态 | 交接入口 | 更新时间 |
 | --- | --- | --- | --- | --- | --- | --- |
-| B001 | Git 初始化与 GitHub 发布 | 无 | 无 | 进行中 | `branches/B001-Git初始化与GitHub发布/Headoff.md` | 2026-09-10 |
+| B001 | Git 初始化与 GitHub 发布 | 无 | 无 | 已完成 | `branches/B001-Git初始化与GitHub发布/Headoff.md` | 2026-09-10 |

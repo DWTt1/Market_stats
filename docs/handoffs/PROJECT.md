@@ -11,9 +11,10 @@
 
 ## 总体进度
 
-- 本地 Git 已初始化，正在向用户指定的 GitHub 仓库执行首次发布。
+- 本地 Git 已初始化，并已发布到用户指定的 GitHub 仓库。
 
 ## 关键产物
 
 - 项目说明：`../../README.md`
 - 分支索引：`INDEX.md`
+- GitHub 仓库：`https://github.com/DWTt1/Market_stats`
