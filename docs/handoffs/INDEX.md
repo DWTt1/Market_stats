@@ -4,3 +4,4 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | B001 | Git 初始化与 GitHub 发布 | 无 | 无 | 已完成 | `branches/B001-Git初始化与GitHub发布/Headoff.md` | 2026-09-10 |
 | B002 | A股统计网站开发 | 无 | B001 | 暂停（用户要求停止验收和说明收尾） | `branches/B002-A股统计网站开发/Headoff.md` | 2026-09-10 |
+| B003 | 公网部署（Cloudflare Pages） | B002 | B001、B002 | 进行中 | `branches/B003-公网部署/Headoff.md` | 2026-09-10 |

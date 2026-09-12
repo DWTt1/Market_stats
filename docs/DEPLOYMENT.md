@@ -15,7 +15,7 @@
 
 支持两种方式：手动上传 `dist/`，或后续连接 Git 仓库自动构建。
 
-- Framework：Vite；Node：24 LTS。
+- Framework：Vite；Node：24 LTS。Cloudflare Pages 当前默认 Node 22.16.0，低于本项目 `package.json` 声明的 `>=22.22.0`，因此应显式设置 `NODE_VERSION=24`。
 - Build command：`npm run build`（平台安装阶段使用锁文件安装 npm 依赖）。
 - Output directory：`dist`。
 - Root directory：仓库根目录。
@@ -25,6 +25,30 @@
 - `public/_headers` 为日期索引设置重新验证缓存规则。JSON 无更新时先检查 CDN 和浏览器是否仍缓存旧 index。
 
 [Cloudflare Pages 静态路由说明](https://developers.cloudflare.com/pages/configuration/serving-pages/)、[Vite 静态部署说明](https://vite.dev/guide/static-deploy.html)。
+
+### 推荐方案：连接 GitHub 自动部署
+
+1. 登录 Cloudflare Dashboard，进入 **Workers & Pages**，依次选择 **Create application → Pages → Connect to Git**。
+2. 授权 Cloudflare 的 GitHub App，并只授予所需仓库时选择 `DWTt1/Market_stats`。
+3. 选择仓库后配置项目：
+
+   | 配置项 | 本项目值 |
+   | --- | --- |
+   | Production branch | `main` |
+   | Framework preset | `React (Vite)`；控制台可能只显示为 `React` |
+   | Root directory | 留空（即仓库根目录） |
+   | Build command | `npm run build` |
+   | Build output directory | `dist` |
+   | `NODE_VERSION` | `24` |
+   | `VITE_BASE_PATH` | `/` |
+
+   `VITE_SITE_NAME` 可选；不设置时网站名称为“A股涨跌统计”。当前静态站点不需要 API 密钥或 Pages Functions。
+4. 选择 **Save and Deploy**，等待首次构建成功，并记下 Cloudflare 分配的 `<项目名>.pages.dev` 地址。
+5. 在公网验收首页、日期页、行业页、个股历史页和一个直接打开的深层 URL；同时检查 `/data/index.json` 可访问且内容为最新版本。
+6. 以后在本地运行 `update_data.bat` 生成新数据，将获准发布的 `public/data`、代码和文档提交并推送到 `main`；GitHub 推送会自动触发下一次生产构建。
+7. 需要自定义域名时，在 Pages 项目的 **Custom domains** 中添加。根域名需要将域名作为 Cloudflare Zone 并使用 Cloudflare nameserver；外部 DNS 上的子域名可按向导配置 CNAME 到 `<项目名>.pages.dev`。
+
+Pages 项目创建时需选定 Git integration 或 Direct Upload；两种项目类型之后不能直接互相切换。若只想临时验证，可新建 Direct Upload 项目并上传 `dist/`，但长期每日更新更适合 Git integration。Cloudflare 当前对新项目总体更推荐 Workers，不过 Pages 仍支持此静态站点和 Git 自动部署。
 
 ## Vercel
 
