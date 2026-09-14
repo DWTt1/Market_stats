@@ -18,6 +18,7 @@
 - B003 公网部署已开始，Pages 构建配置已整理；用户已进入 Pages 配置界面，但 Pages 项目是否创建及首次生产部署是否成功尚未核验。
 - 2026-09-12，用户要求把新导入的 2026-09-11 数据同步到 GitHub；本地数据提交为 `0657d9b`、`24ae6b9`，恢复时应核对 `origin/main` 和 Cloudflare 构建状态。
 - 2026-09-14，用户建立 B004 作为后续本地代码改动同步到 GitHub 的专用问题分支；用户每次通知改动完成后，在该分支核查、提交、推送并验证远端状态。当天数据已提交为 `efa2edd` 并推送至 `origin/main`；数据索引最新日期为 2026-09-14。
+- 2026-09-15，B005 完成周线 KDJ/RSI 数据导入、每日明细筛选/排序/CSV、旧日期兼容和测试。9 月 14 日原始 Excel 的四列已重导为新 JSON 版本；B004 已将功能和数据提交 `0ec0f4e` 推送到 GitHub。Cloudflare Pages 构建和线上表现仍由 B003 核验。
 
 ## 关键产物
 
@@ -27,3 +28,4 @@
 - 网站开发交接：`branches/B002-A股统计网站开发/Headoff.md`
 - 公网部署交接：`branches/B003-公网部署/Headoff.md`
 - GitHub 同步交接：`branches/B004-GitHub同步/Headoff.md`
+- 周线技术指标交接：`branches/B005-周线技术指标筛选/Headoff.md`

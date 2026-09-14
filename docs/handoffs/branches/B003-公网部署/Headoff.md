@@ -7,7 +7,7 @@
 - 父分支：B002 A股统计网站开发
 - 依赖分支：B001、B002
 - 状态：进行中
-- 更新时间：2026-09-12
+- 更新时间：2026-09-15
 - 项目位置：`C:\Users\SAIVIA\Desktop\股票市场统计项目`
 
 ## 当前目标、范围与完成标准
@@ -42,6 +42,7 @@
 - 已确认：用户从 Workers 配置页转到 Pages 配置页；曾选错 VitePress，已指导改选 React (Vite) 或手动填写构建命令。是否已完成首次部署未验证。
 - 已完成：2026-09-11 数据导入后，`public/data/index.json` 的 latest 为 `2026-09-11`；6 个当日 JSON 和 256 个股票历史分片已写入仓库工作目录。
 - 已完成：数据变更形成本地提交 `0657d9b`（索引及历史分片）和 `24ae6b9`（当日 6 个 JSON）。本轮 GitHub 同步结果应在恢复时通过 `git status`、`git ls-remote` 核对。
+- 跨分支跟进：2026-09-15，B004 已将 B005 周线 KDJ/RSI 功能及 9 月 14 日新数据版本提交 `0ec0f4e` 推送至 GitHub `main`。Cloudflare Pages 是否自动构建成功、生产页面是否展示新筛选功能仍未核验。
 - 进行中：Pages 构建及线上状态核验；GitHub 同步结果以远端提交 SHA 为准。
 - 实际产物：`docs/DEPLOYMENT.md`、本文件、`docs/handoffs/INDEX.md`、`docs/handoffs/PROJECT.md`。
 
@@ -64,9 +65,9 @@
 
 ## 下一步
 
-1. 核对 `origin/main` 是否包含 2026-09-11 数据提交；若尚未同步，先完成本轮授权范围内的推送。
+1. 恢复时核对 `origin/main` 是否包含 B004 的 `0ec0f4e` 及后续交接提交，确认 Cloudflare Pages 是否已创建、自动构建是否成功，并取得生产 URL。
 2. 确认用户是否已创建 Git-integrated Pages 项目并取得生产 URL；未创建则按 `docs/DEPLOYMENT.md` 继续配置。
-3. 查看 Pages 构建结果，核对生产 URL 对应的提交和 `/data/index.json` 的 latest 是否为 `2026-09-11`。
+3. 查看 Pages 构建结果，核对生产 URL 对应的提交、`/data/index.json` 的 latest 是否为 `2026-09-14`，并检查周线筛选功能。
 4. 验收首页、深层路由和关键页面；必要时修复部署配置并重试。
 5. 完成线上验证后更新本交接、项目总览与分支索引。
 
