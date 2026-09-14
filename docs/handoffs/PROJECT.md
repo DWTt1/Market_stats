@@ -17,6 +17,7 @@
 - 用户已于 2026-09-10 明确授权将当前项目更新同步推送到既有 GitHub 仓库 `DWTt1/Market_stats`。
 - B003 公网部署已开始，Pages 构建配置已整理；用户已进入 Pages 配置界面，但 Pages 项目是否创建及首次生产部署是否成功尚未核验。
 - 2026-09-12，用户要求把新导入的 2026-09-11 数据同步到 GitHub；本地数据提交为 `0657d9b`、`24ae6b9`，恢复时应核对 `origin/main` 和 Cloudflare 构建状态。
+- 2026-09-14，用户建立 B004 作为后续本地代码改动同步到 GitHub 的专用问题分支；用户每次通知改动完成后，在该分支核查、提交、推送并验证远端状态。当天数据已提交为 `efa2edd` 并推送至 `origin/main`；数据索引最新日期为 2026-09-14。
 
 ## 关键产物
 
@@ -25,3 +26,4 @@
 - GitHub 仓库：`https://github.com/DWTt1/Market_stats`
 - 网站开发交接：`branches/B002-A股统计网站开发/Headoff.md`
 - 公网部署交接：`branches/B003-公网部署/Headoff.md`
+- GitHub 同步交接：`branches/B004-GitHub同步/Headoff.md`
