@@ -14,6 +14,10 @@ export interface StockRecord {
   close: number | null;
   volume: number | null;
   listedDate: string | null;
+  weeklyKdjK?: number | null;
+  weeklyKdjD?: number | null;
+  weeklyKdjJ?: number | null;
+  weeklyRsi14?: number | null;
 }
 export interface ExceptionRecord extends StockRecord {
   type: string;
@@ -46,6 +50,7 @@ export interface Validation {
 export interface DailySummary {
   schemaVersion: number;
   date: string;
+  capabilities?: { weeklyTechnicalIndicators: boolean };
   importedAt: string;
   counts: Counts;
   metrics: Metrics;
@@ -79,6 +84,7 @@ export interface DailySummary {
 }
 export interface DayEntry {
   date: string;
+  capabilities?: { weeklyTechnicalIndicators: boolean };
   revision: string;
   importedAt: string;
   sourceFile: string;

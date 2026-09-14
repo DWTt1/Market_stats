@@ -42,8 +42,12 @@ def build_day(book, file, candidates, origin, date, issues, sha):
     industry, status['行业汇总'] = read_industry(book, issues)
     counts = {signal: len(records) if status[SIGNALS[signal]] == 'available' else None for signal, records in signals.items()}
     counts['exceptions'] = len(exceptions) if status['异常'] == 'available' else None
+    capabilities = {'weeklyTechnicalIndicators': any(
+        row['weeklyKdjJ'] is not None or row['weeklyRsi14'] is not None
+        for records in signals.values() for row in records
+    )}
     yang = sorted(signals['three-yang-plus'], key=lambda r: (-(r['streak'] or 0), r['code']))
-    summary.update(schemaVersion=VERSION, date=date, importedAt=now(), counts=counts, sheetStatus=status,
+    summary.update(schemaVersion=VERSION, date=date, importedAt=now(), counts=counts, capabilities=capabilities, sheetStatus=status,
                    source={'file': file.name, 'sha256': sha, 'modifiedAt': datetime.fromtimestamp(file.stat().st_mtime).astimezone().isoformat(),
                            'candidates': [p.name for p in candidates], 'dateOrigin': origin},
                    sources={'market': 'iFinD 当日行情及停牌查询', 'calendar': '上海证券交易所公开交易日历'},
@@ -171,6 +175,7 @@ def run(args):
                     log('WARNING', f'{date} {item["name"]}: {item["message"]} (预期={item["expected"]}, 实际={item["actual"]})')
             existing[date] = {'date': date, 'revision': revision, 'importedAt': summary['importedAt'], 'sourceFile': selected.name,
                               'signature': signature, 'counts': summary['counts'], 'metrics': summary['metrics'],
+                              'capabilities': summary['capabilities'],
                               'tradingStatus': summary['tradingStatus'], 'warningCount': issues_count,
                               'summaryPath': summary_path, 'files': paths}
             changed.append(date)

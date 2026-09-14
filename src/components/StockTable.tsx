@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import type { StockRow } from "../utils/stocks";
 import { filterAndSort } from "../utils/stocks";
+import { hasWeeklyTechnicalIndicators } from "../utils/stocks";
 import { exportCsv } from "../utils/csv";
-import { number, volume } from "../utils/format";
+import { indicator, number, volume } from "../utils/format";
+import { TechnicalFilters } from "./TechnicalFilters";
 
 const columns = [
   ["code", "证券代码"],
@@ -28,16 +30,19 @@ const columns = [
   ["volume", "成交量"],
   ["listedDate", "上市日期"],
 ];
+const technicalColumns = [["weeklyKdjJ", "周 J"], ["weeklyRsi14", "周 RSI14"]];
 export function StockTable({
   rows,
   date,
   signal,
   exceptions = false,
+  weeklyAvailable = false,
 }: {
   rows: StockRow[];
   date: string;
   signal: string;
   exceptions?: boolean;
+  weeklyAvailable?: boolean;
 }) {
   const [params, setParams] = useSearchParams();
   const pendingParams = useRef(params);
@@ -54,7 +59,8 @@ export function StockTable({
     pendingParams.current = p;
     setParams(p, { replace: true });
   };
-  const filtered = useMemo(() => filterAndSort(rows, params), [rows, params]);
+  const technicalAvailable = !exceptions && (weeklyAvailable || hasWeeklyTechnicalIndicators(rows));
+  const filtered = useMemo(() => filterAndSort(rows, params, technicalAvailable), [rows, params, technicalAvailable]);
   const industries = [
     ...new Set(rows.map((r) => r.industry || "__unknown")),
   ].sort((a, b) => a.localeCompare(b, "zh-CN"));
@@ -81,7 +87,7 @@ export function StockTable({
         ["type", "异常类型"],
         ["missingDates", "缺失日期"],
       ]
-    : columns;
+    : technicalAvailable ? [...columns, ...technicalColumns] : columns;
   return (
     <section className="panel table-panel">
       <div className="filter-bar">
@@ -146,6 +152,7 @@ export function StockTable({
             ))}
           </select>
         )}
+        {!exceptions && technicalAvailable && <TechnicalFilters params={params} update={update} />}
         <button
           className="icon-button reset-button"
           aria-label="重置筛选"
@@ -157,13 +164,16 @@ export function StockTable({
         <button
           className="button export-button"
           onClick={() =>
-            exportCsv(filtered, `${date}_${signal}_筛选结果.csv`, exceptions)
+            exportCsv(filtered, `${date}_${signal}_筛选结果.csv`, exceptions, technicalAvailable)
           }
         >
           <Download size={15} />
           导出当前结果
         </button>
       </div>
+      {!exceptions && !technicalAvailable && (
+        <div className="technical-unavailable">该交易日暂无周线技术指标数据。</div>
+      )}
       {signal === "three-yang-plus" && (
         <div className="quick-filters">
           <span className="muted">连续阳线</span>
@@ -288,6 +298,12 @@ export function StockTable({
                   {volume(row.volume)}
                 </td>
                 <td className="code muted">{row.listedDate || "—"}</td>
+                {technicalAvailable && (
+                  <>
+                    <td className="numeric">{indicator(row.weeklyKdjJ)}</td>
+                    <td className="numeric">{indicator(row.weeklyRsi14)}</td>
+                  </>
+                )}
                 {exceptions && "type" in row && (
                   <>
                     <td>{row.type}</td>

@@ -2,6 +2,10 @@ export const number = (value: number | null | undefined) =>
   value == null || !Number.isFinite(value)
     ? "—"
     : value.toLocaleString("zh-CN", { maximumFractionDigits: 8 });
+export const indicator = (value: number | null | undefined) =>
+  value == null || !Number.isFinite(value)
+    ? "—"
+    : value.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
 export const percent = (value: number | null | undefined) =>
   value == null || !Number.isFinite(value)
     ? "—"

@@ -38,7 +38,7 @@ class ImporterTests(unittest.TestCase):
             item.stop()
         self.temporary.cleanup()
 
-    def workbook(self, filename, date='2026-09-10', volume=123456, mtime=1700000000):
+    def workbook(self, filename, date='2026-09-10', volume=123456, mtime=1700000000, weekly=False):
         book = Workbook()
         s = book.active
         s.title = '汇总'
@@ -51,9 +51,15 @@ class ImporterTests(unittest.TestCase):
             s = book.create_sheet(name)
             s.append(['标题（错误的9999只）'])
             s.append([])
-            s.append(['证券简称', '未知新增列', '证券代码', '连续天数', '成交量', '上市日期', 'ST/*ST', '申万一级行业'])
+            headers = ['证券简称', '未知新增列', '证券代码', '连续天数', '成交量', '上市日期', 'ST/*ST', '申万一级行业']
+            if weekly:
+                headers[1:1] = ['周RSI14', '周KDJ-J', '周KDJ-D', '周KDJ-K']
+            s.append(headers)
             if name == '严格两连阴':
-                s.append(['样本', '忽略', '000607.SZ', 2, volume, to_excel(datetime(1996,8,30)), None, '传媒'])
+                values = ['样本', '忽略', '000607.SZ', 2, volume, to_excel(datetime(1996,8,30)), None, '传媒']
+                if weekly:
+                    values[1:1] = [41.2876, -5.25, 38.302, 38.978]
+                s.append(values)
         s = book.create_sheet('异常'); s.append(['异常类型', '证券代码'])
         s = book.create_sheet('行业汇总'); s.append(['类别', '排名', '申万一级行业', '数量']);s.append(['严格两连阴',1,'传媒',1])
         path=self.source/filename;book.save(path);book.close();os.utime(path,(mtime,mtime));return path
@@ -104,6 +110,42 @@ class ImporterTests(unittest.TestCase):
 
     def test_invalid_t0_never_falls_back_to_filename(self):
         with self.assertRaises(ValueError):summary_date([['T0日期','bad'],['A股连阴连阳扫描（2026-09-10）']],datetime(1899,12,30),[])
+
+    def test_weekly_headers_are_optional_numeric_and_capability_depends_on_valid_values(self):
+        self.workbook('old.xlsx', date='2026-09-11')
+        self.workbook('new.xlsx', date='2026-09-14', weekly=True)
+        code,_=self.run_import();self.assertEqual(code,0)
+        days={day['date']:day for day in self.index()['days']}
+        old=json.loads((self.data/days['2026-09-11']['files']['two-yin']).read_text(encoding='utf-8'))[0]
+        new=json.loads((self.data/days['2026-09-14']['files']['two-yin']).read_text(encoding='utf-8'))[0]
+        self.assertIsNone(old['weeklyKdjJ']);self.assertIsNone(old['weeklyRsi14'])
+        self.assertFalse(days['2026-09-11']['capabilities']['weeklyTechnicalIndicators'])
+        self.assertEqual(new['weeklyKdjK'],38.978)
+        self.assertEqual(new['weeklyKdjD'],38.302)
+        self.assertEqual(new['weeklyKdjJ'],-5.25)
+        self.assertEqual(new['weeklyRsi14'],41.2876)
+        self.assertIsInstance(new['weeklyRsi14'],float)
+        self.assertTrue(days['2026-09-14']['capabilities']['weeklyTechnicalIndicators'])
+
+    def test_weekly_nulls_do_not_become_zero_and_wholly_missing_day_is_unavailable(self):
+        path=self.workbook('partial.xlsx',date='2026-09-14',weekly=True)
+        from openpyxl import load_workbook
+        book=load_workbook(path)
+        sheet=book['严格两连阴']
+        sheet.append(['缺失样本',None,None,None,None,None,'000608.SZ',2,100,None,'否','传媒'])
+        book.save(path);book.close();os.utime(path,(1700000000,1700000000))
+        self.run_import()
+        day=self.index()['days'][0]
+        rows=json.loads((self.data/day['files']['two-yin']).read_text(encoding='utf-8'))
+        self.assertTrue(day['capabilities']['weeklyTechnicalIndicators'])
+        self.assertIsNone(rows[1]['weeklyKdjJ']);self.assertIsNone(rows[1]['weeklyRsi14'])
+        self.assertNotEqual(rows[1]['weeklyKdjJ'],0)
+        book=load_workbook(path)
+        sheet=book['严格两连阴']
+        for col in range(2,6):sheet.cell(4,col).value=None
+        book.save(path);book.close();os.utime(path,(1700000002,1700000002))
+        self.run_import(rebuild=True)
+        self.assertFalse(self.index()['days'][0]['capabilities']['weeklyTechnicalIndicators'])
 
 
 if __name__=='__main__':unittest.main()

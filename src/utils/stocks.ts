@@ -1,14 +1,53 @@
 import type { ExceptionRecord, StockRecord } from "../types/data";
 export type StockRow = StockRecord | ExceptionRecord;
+const validIndicator = (value: number | null | undefined): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+
+export function hasWeeklyTechnicalIndicators(records: StockRow[]) {
+  return records.some(
+    (row) => validIndicator(row.weeklyKdjJ) || validIndicator(row.weeklyRsi14),
+  );
+}
+
+function boundary(params: URLSearchParams, key: string) {
+  const raw = params.get(key);
+  if (raw == null || raw.trim() === "") return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+}
+
+function matchesIndicator(
+  value: number | null | undefined,
+  preset: string | null,
+  lower: number | null,
+  upper: number | null,
+  kind: "j" | "rsi",
+) {
+  const presets = kind === "j"
+    ? { lt20: ["lt", 20], gt80: ["gt", 80], lt0: ["lt", 0], gt100: ["gt", 100] } as const
+    : { lt35: ["lt", 35], gt70: ["gt", 70] } as const;
+  const condition = preset && Object.hasOwn(presets, preset)
+    ? presets[preset as keyof typeof presets]
+    : null;
+  if (!condition && lower == null && upper == null) return true;
+  if (!validIndicator(value)) return false;
+  if (condition) return condition[0] === "lt" ? value < condition[1] : value > condition[1];
+  return (lower == null || value >= lower) && (upper == null || value <= upper);
+}
+
 export function filterAndSort(
   records: StockRow[],
   params: URLSearchParams,
+  technicalAvailable = hasWeeklyTechnicalIndicators(records),
 ): StockRow[] {
   const search = (params.get("q") || "").trim().toLowerCase(),
     industry = params.get("industry"),
     st = params.get("st"),
     streak = params.get("streak"),
     type = params.get("type");
+  const jPreset = params.get("j"), rsiPreset = params.get("rsi"),
+    jMin = boundary(params, "jMin"), jMax = boundary(params, "jMax"),
+    rsiMin = boundary(params, "rsiMin"), rsiMax = boundary(params, "rsiMax");
   const sort = params.get("sort") || "code",
     direction = params.get("order") === "desc" ? -1 : 1;
   const filtered = records.filter((r) => {
@@ -30,6 +69,10 @@ export function filterAndSort(
     )
       return false;
     if (type && (!("type" in r) || r.type !== type)) return false;
+    if (technicalAvailable && (
+      !matchesIndicator(r.weeklyKdjJ, jPreset, jMin, jMax, "j") ||
+      !matchesIndicator(r.weeklyRsi14, rsiPreset, rsiMin, rsiMax, "rsi")
+    )) return false;
     return true;
   });
   return filtered.sort((a, b) => {

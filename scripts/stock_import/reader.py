@@ -8,6 +8,8 @@ SIGNALS = {'two-yin': '严格两连阴', 'three-yin': '严格三连阴', 'three-
 ALIASES = {'ST标识': 'ST/*ST', 'ST/＊ST': 'ST/*ST', '股票数': '数量', '缺失交易日': '缺失日期'}
 FIELDS = {'证券代码': 'code', '证券简称': 'name', '申万一级行业': 'industry', '连续天数': 'streak',
           '开盘价': 'open', '最高价': 'high', '最低价': 'low', '收盘价': 'close', '成交量': 'volume', '上市日期': 'listedDate'}
+WEEKLY_FIELDS = {'周KDJ-K': 'weeklyKdjK', '周KDJ-D': 'weeklyKdjD',
+                 '周KDJ-J': 'weeklyKdjJ', '周RSI14': 'weeklyRsi14'}
 
 
 def clean(value):
@@ -86,6 +88,9 @@ def read_stocks(book, sheet, issues, exception=False):
         record['stLabel'] = text(row.get('ST/*ST'))
         for key in ['开盘价', '最高价', '最低价', '收盘价', '成交量']:
             record[FIELDS[key]] = number(row.get(key), key == '成交量')
+        if not exception:
+            for header, field in WEEKLY_FIELDS.items():
+                record[field] = number(row.get(header))
         record['listedDate'] = iso_date(row.get('上市日期'), book.epoch)
         if exception:
             record['type'] = text(row.get('异常类型')) or '未注明类型'

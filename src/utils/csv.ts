@@ -1,4 +1,4 @@
-import type { StockRow } from "./stocks";
+import { hasWeeklyTechnicalIndicators, type StockRow } from "./stocks.ts";
 const fields = [
   "code",
   "name",
@@ -25,16 +25,22 @@ const labels = [
   "成交量",
   "上市日期",
 ];
+const technicalFields = ["weeklyKdjK", "weeklyKdjD", "weeklyKdjJ", "weeklyRsi14"] as const;
+const technicalLabels = ["周KDJ-K", "周KDJ-D", "周KDJ-J", "周RSI14"];
 function cell(value: unknown) {
   let text = value == null ? "" : String(value);
   if (/^[=+\-@\t\r\n]/.test(text)) text = `'${text}`;
   return `"${text.replaceAll('"', '""')}"`;
 }
-export function makeCsv(rows: StockRow[], exceptions = false) {
+export function makeCsv(
+  rows: StockRow[],
+  exceptions = false,
+  includeTechnical = !exceptions && hasWeeklyTechnicalIndicators(rows),
+) {
   return (
     "\uFEFF" +
     [
-      exceptions ? [...labels, "异常类型", "缺失日期"] : labels,
+      exceptions ? [...labels, "异常类型", "缺失日期"] : includeTechnical ? [...labels, ...technicalLabels] : labels,
       ...rows.map((row) => {
         const values: unknown[] = fields.map((field) =>
           field === "isST"
@@ -45,6 +51,8 @@ export function makeCsv(rows: StockRow[], exceptions = false) {
                 : "否"
             : row[field],
         );
+        if (includeTechnical && !exceptions)
+          return [...values, ...technicalFields.map((field) => row[field])];
         return exceptions && "type" in row
           ? [...values, row.type, row.missingDates?.join(";")]
           : values;
@@ -58,9 +66,10 @@ export function exportCsv(
   rows: StockRow[],
   filename: string,
   exceptions = false,
+  includeTechnical = !exceptions && hasWeeklyTechnicalIndicators(rows),
 ) {
   const url = URL.createObjectURL(
-    new Blob([makeCsv(rows, exceptions)], { type: "text/csv;charset=utf-8;" }),
+    new Blob([makeCsv(rows, exceptions, includeTechnical)], { type: "text/csv;charset=utf-8;" }),
   );
   const anchor = document.createElement("a");
   anchor.href = url;

@@ -6,7 +6,7 @@
 
 `public/data/index.json` 是前端唯一入口，`schemaVersion=1`。字段包括 `latest`、`dates`（新到旧）、`generatedAt`、`days`、`stockHistoryFormat` 和 `stockHistoryShards`。
 
-每个 `days` 项包含交易日期、导入时间、源文件名、摘要 counts/metrics、校验提示数量、`summaryPath`、各明细 `files` 路径和 `revision`。所有路径相对于 `public/data/`。不在索引放全部股票记录。
+每个 `days` 项包含交易日期、导入时间、源文件名、摘要 counts/metrics、可选 `capabilities`、校验提示数量、`summaryPath`、各明细 `files` 路径和 `revision`。所有路径相对于 `public/data/`。不在索引放全部股票记录。
 
 ```text
 public/data/
@@ -30,6 +30,8 @@ public/data/
 
 `StockRecord`：`code`、`name`、`industry`、`streak`、`isST`、`stLabel`、`open/high/low/close`、`volume`、`listedDate`。
 
+三个信号明细表还可包含 `weeklyKdjK`、`weeklyKdjD`、`weeklyKdjJ`、`weeklyRsi14`，分别从 Excel 表头 `周KDJ-K`、`周KDJ-D`、`周KDJ-J`、`周RSI14` 读取。导入器仅保存已有指标，不根据行情重新计算。每个指标为数字或 `null`；旧版已发布 JSON 可完全缺少这些字段。当天至少有一条信号记录含有效周 J 或周 RSI14 时，索引和摘要中的 `capabilities.weeklyTechnicalIndicators` 为 `true`，否则为 `false`。旧索引无此标记时前端按实际记录判断；旧日期无指标时不启用技术筛选，也不把缺失值解释成 0。
+
 - 代码始终是字符串，保留前导零和交易所后缀。
 - 日期统一 `YYYY-MM-DD`，支持 Excel 1900/1904 日期系统、日期对象、分隔格式和紧凑 `YYYYMMDD`。
 - `volume` 为整数；价格保留合理精度，最多八位小数。
@@ -44,6 +46,7 @@ public/data/
 
 - 不按行号找表头；读取实际 `证券代码`、`类别/数量`、`异常类型` 等字段。
 - 支持 `ST标识 → ST/*ST`、`股票数 → 数量`、`缺失交易日 → 缺失日期`，忽略新增未知列。
+- 周线技术指标列按表头识别，不依赖列号；旧 Excel 缺列时指标保持 `null`。2026-09-14 工作簿是首个含四列的已导入样本，9 月 11 日及以前的已发布历史 JSON 原样保留。
 - 优先汇总 `T0日期`。T0 存在但非法时拒绝该文件。仅缺失 T0 时允许从汇总“扫描标题/范围”识别唯一明确日期，并 WARNING，不依赖文件名。
 - 2026-09-08 是旧格式，无单独 T0、异常合计、交易状态和刷新日期。保留缺失值；交易状态显示“源文件未注明”。旧版 ST 空白仍显示“未知”。
 - 9/8 原表 `920289.BJ 华汇智能` 同时出现在严格两连阴和“上市历史不足”异常中。网站保留两条原始归属并记录交集警告，不擅自删除。

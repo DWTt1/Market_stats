@@ -55,6 +55,8 @@ VITE_BASE_PATH=/
 
 最简单方式：统计程序输出新 Excel 后，双击 **`update_data.bat`**。
 
+带有 `周KDJ-K`、`周KDJ-D`、`周KDJ-J`、`周RSI14` 列的新 Excel 沿用同一更新流程；导入器按表头读取并自动启用当天的周线筛选。旧 Excel 和历史日期仍可照常使用，不需要补算指标。
+
 也可使用：
 
 ```powershell

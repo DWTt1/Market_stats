@@ -23,7 +23,7 @@ function Records({ day, signal }: { day: DayEntry; signal: Signal }) {
           源文件中该工作表缺失或不可读，当前记录不完整。
         </div>
       )}
-      <StockTable rows={state.data} date={day.date} signal={signal} />
+      <StockTable rows={state.data} date={day.date} signal={signal} weeklyAvailable={day.capabilities?.weeklyTechnicalIndicators} />
     </>
   );
 }
@@ -60,7 +60,12 @@ export default function Daily() {
                 key={s}
                 className={s === "three-yang-plus" ? "yang" : "yin"}
                 aria-pressed={signal === s}
-                onClick={() => setParams({ signal: s })}
+                onClick={() => {
+                  const next = new URLSearchParams(params);
+                  next.set("signal", s);
+                  next.delete("page");
+                  setParams(next);
+                }}
               >
                 {SIGNAL_LABELS[s]}
                 <span>{number(day.counts[s])}</span>
